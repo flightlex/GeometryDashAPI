@@ -18,7 +18,7 @@ namespace GeometryDashAPI.Levels.GameObjects.Default
 
         [GameProperty("36", false, Order = Trigger.OrderTriggerBase)] public bool IsTrigger { get; set; }
 
-        [GameProperty("6", 0)] public int Rotation { get; set; }
+        [GameProperty("6", 0.0f)] public float Rotation { get; set; }
         
         public bool Glow
         {

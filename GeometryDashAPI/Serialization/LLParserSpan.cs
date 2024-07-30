@@ -110,7 +110,8 @@ namespace GeometryDashAPI.Serialization
             }
             value = Next();
             if (value == null)
-                throw new Exception("Invalid raw data. Count of components in raw data is odd");
+                value = "".AsSpan();
+                //throw new Exception("Invalid raw data. Count of components in raw data is odd");
             return true;
         }
     }

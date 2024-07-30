@@ -13,11 +13,17 @@ namespace GeometryDashAPI.Serialization
 {
     public class Plist : Dictionary<string, dynamic>
     {
-        private static readonly XmlReaderSettings xmlSettings = new XmlReaderSettings()
+        private static readonly XmlReaderSettings _xmlReaderSettings = new XmlReaderSettings()
         {
             CheckCharacters = false, // to skip XML reserved characters
-            DtdProcessing = DtdProcessing.Ignore,
+            DtdProcessing = DtdProcessing.Parse,
             XmlResolver = null
+        };
+
+        private static readonly XmlWriterSettings _xmlWriterSettings = new XmlWriterSettings()
+        {
+            CheckCharacters = false,
+            Indent = false
         };
 
         public Plist()
@@ -35,7 +41,7 @@ namespace GeometryDashAPI.Serialization
         {
             Clear();
 
-            var document = XDocument.Load(XmlReader.Create(stream, xmlSettings));
+            var document = XDocument.Load(XmlReader.Create(stream, _xmlReaderSettings));
             var plist = document.Element("plist");
             if (plist == null)
                 throw new InvalidOperationException("'plist' element is not found in the xml file");
@@ -98,17 +104,27 @@ namespace GeometryDashAPI.Serialization
         public void SaveToStream(Stream stream)
         {
             var document = CreateDocumentFromThis();
-            document.Save(stream, SaveOptions.DisableFormatting);
+
+            _xmlWriterSettings.Async = false;
+            XmlWriter writer = XmlWriter.Create(stream, _xmlWriterSettings);
+
+            document.Save(writer);
+            writer.Flush();
         }
 
         public async Task SaveToStreamAsync(Stream stream)
         {
             var document = CreateDocumentFromThis();
+
+            _xmlWriterSettings.Async = true;
+            XmlWriter writer = XmlWriter.Create(stream, _xmlWriterSettings);
+
 #if NETSTANDARD2_1
-            await document.SaveAsync(stream, SaveOptions.DisableFormatting, CancellationToken.None);
+            await document.SaveAsync(writer, CancellationToken.None);
 #else
-            await Task.Run(() => document.Save(stream, SaveOptions.DisableFormatting));
+            await Task.Run(() => document.Save(writer));
 #endif
+            await writer.FlushAsync();
         }
 
         private XDocument CreateDocumentFromThis()
@@ -119,6 +135,7 @@ namespace GeometryDashAPI.Serialization
             root.Add(new XAttribute("gjver", "2.0"));
             root.Add(RecursivePlistToString(this, "dict"));
             document.Add(root);
+
             return document;
         }
 
@@ -128,6 +145,7 @@ namespace GeometryDashAPI.Serialization
             foreach (var element in plist)
             {
                 dict.Add(new XElement("k", element.Key));
+
                 if (element.Value is string)
                     dict.Add(new XElement("s", element.Value));
                 else if (element.Value is int)

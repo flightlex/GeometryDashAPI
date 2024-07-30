@@ -1,6 +1,4 @@
 ﻿using GeometryDashAPI.Levels;
-using System;
-using System.Text;
 using GeometryDashAPI.Serialization;
 
 namespace GeometryDashAPI.Data.Models
@@ -18,8 +16,8 @@ namespace GeometryDashAPI.Data.Models
 
         public string Description
         {
-            get => DataLevel.ContainsKey("k3") ? Encoding.ASCII.GetString(Convert.FromBase64String(DataLevel["k3"])) : "";
-            set => DataLevel["k3"] = Convert.ToBase64String(Encoding.ASCII.GetBytes(value));
+            get => DataLevel.ContainsKey("k3") ? GameConvert.FromBase64String(DataLevel["k3"]) : string.Empty;
+            set => DataLevel["k3"] = GameConvert.ToBase64String(value);
         }
 
         public string LevelString => DataLevel.ContainsKey("k4") ? DataLevel["k4"] : Level.DefaultLevelString;
@@ -110,10 +108,23 @@ namespace GeometryDashAPI.Data.Models
             get => DataLevel.ContainsKey("kI1") ? DataLevel["kI1"] : 0;
             set => DataLevel["kI1"] = value;
         }
+
         public float CameraPositionY
         {
             get => DataLevel.ContainsKey("kI2") ? DataLevel["kI2"] : 0;
             set => DataLevel["kI2"] = value;
+        }
+
+        public int PublishedId
+        {
+            get => DataLevel.ContainsKey("k1") ? DataLevel["k1"] : 0;
+            set => DataLevel["k1"] = value;
+        }
+
+        public int OriginalId
+        {
+            get => DataLevel.ContainsKey("k42") ? DataLevel["k42"] : 0;
+            set => DataLevel["k42"] = value;
         }
 
         public void SetMusicId(bool custom, int id)
